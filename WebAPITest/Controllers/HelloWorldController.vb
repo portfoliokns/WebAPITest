@@ -14,6 +14,7 @@ Namespace Controllers
         End Function
         '/api/helloworld
         '/api/helloworld/getmessage
+        'curl https://localhost:44325/api/helloworld
 
         <HttpGet>
         <Route("api/helloworld/Add")>
@@ -71,88 +72,86 @@ Namespace Controllers
         End Function
         '/api/helloworld/json
 
+        <HttpPost>
+        <Route("api/helloworld/savetext")>
+        Public Sub SaveText(<FromBody> ByVal text As String)
 
-        '<HttpPost>
-        'Public Sub SaveText(<FromBody> ByVal text As String)
+            '接続先情報を取得
+            Dim devDataSource As String = System.Environment.GetEnvironmentVariable("DEV_DATA_SOURCE")
+            Dim devInitialCatalog As String = System.Environment.GetEnvironmentVariable("DEV_INITIAL_CATALOG")
+            Dim devUserID As String = System.Environment.GetEnvironmentVariable("DEV_USER")
+            Dim devPassword As String = System.Environment.GetEnvironmentVariable("DEV_PASSWORD")
+            Dim devTimeout As String = System.Environment.GetEnvironmentVariable("DEV_TIMEOUT")
 
-        '    '接続先情報を取得
-        '    Dim devDataSource As String = System.Environment.GetEnvironmentVariable("DEV_DATA_SOURCE")
-        '    Dim devInitialCatalog As String = System.Environment.GetEnvironmentVariable("DEV_INITIAL_CATALOG")
-        '    Dim devUserID As String = System.Environment.GetEnvironmentVariable("DEV_USER")
-        '    Dim devPassword As String = System.Environment.GetEnvironmentVariable("DEV_PASSWORD")
-        '    Dim devTimeout As String = System.Environment.GetEnvironmentVariable("DEV_TIMEOUT")
+            Dim connectionString As String = ""
 
-        '    Dim connectionString As String = ""
+            '接続先情報を構築
+            connectionString &= String.Format("Data Source = {0};", devDataSource)
+            connectionString &= String.Format("Initial Catalog = {0};", devInitialCatalog)
+            connectionString &= String.Format("User ID = {0};", devUserID)
+            connectionString &= String.Format("Password = {0};", devPassword)
+            connectionString &= String.Format("Connect Timeout = {0};", devTimeout)
 
-        '    '接続先情報を構築
-        '    connectionString &= String.Format("Data Source = {0};", devDataSource)
-        '    connectionString &= String.Format("Initial Catalog = {0};", devInitialCatalog)
-        '    connectionString &= String.Format("User ID = {0};", devUserID)
-        '    connectionString &= String.Format("Password = {0};", devPassword)
-        '    connectionString &= String.Format("Connect Timeout = {0};", devTimeout)
+            Dim connection As SqlConnection = New SqlConnection(connectionString)
 
-        '    Dim connection As SqlConnection = New SqlConnection(connectionString)
+            ' データベースに接続
+            connection.Open()
 
-        '    ' データベースに接続
-        '    connection.Open()
+            ' SQLクエリの作成
+            Dim query As String = "INSERT INTO dt_text (text) VALUES (@Text)"
+            Dim command As SqlCommand = New SqlCommand(query, connection)
+            command.Parameters.AddWithValue("@Text", text)
 
-        '    ' SQLクエリの作成
-        '    Dim query As String = "INSERT INTO dt_test (text) VALUES (@Text)"
-        '    Dim command As SqlCommand = New SqlCommand(query, connection)
-        '    command.Parameters.AddWithValue("@Text", text)
+            ' クエリを実行
+            command.ExecuteNonQuery()
 
-        '    ' クエリを実行
-        '    command.ExecuteNonQuery()
-
-        '    ' データベース接続を閉じる
-        '    connection.Close()
-        'End Sub
+            ' データベース接続を閉じる
+            connection.Close()
+        End Sub
+        'curl -X POST -H "Content-Type: application/json" -d "\"your_text_here\"" https://localhost:44325/api/helloworld/savetext
 
 
-        '<HttpPost>
-        'Public Sub DeleteText(ByVal text As String)
-        '    ' テキストの削除処理を実装する
-        '    '接続先情報を取得
-        '    Dim devDataSource As String = System.Environment.GetEnvironmentVariable("DEV_DATA_SOURCE")
-        '    Dim devInitialCatalog As String = System.Environment.GetEnvironmentVariable("DEV_INITIAL_CATALOG")
-        '    Dim devUserID As String = System.Environment.GetEnvironmentVariable("DEV_USER")
-        '    Dim devPassword As String = System.Environment.GetEnvironmentVariable("DEV_PASSWORD")
-        '    Dim devTimeout As String = System.Environment.GetEnvironmentVariable("DEV_TIMEOUT")
+        <HttpDelete>
+        <Route("api/helloworld/deletetext/{text}")>
+        Public Function DeleteText(ByVal text As String) As IHttpActionResult
+            ' テキストの削除処理を実装する
+            '接続先情報を取得
+            Dim devDataSource As String = System.Environment.GetEnvironmentVariable("DEV_DATA_SOURCE")
+            Dim devInitialCatalog As String = System.Environment.GetEnvironmentVariable("DEV_INITIAL_CATALOG")
+            Dim devUserID As String = System.Environment.GetEnvironmentVariable("DEV_USER")
+            Dim devPassword As String = System.Environment.GetEnvironmentVariable("DEV_PASSWORD")
+            Dim devTimeout As String = System.Environment.GetEnvironmentVariable("DEV_TIMEOUT")
 
-        '    Dim connectionString As String = ""
+            Dim connectionString As String = ""
 
-        '    '接続先情報を構築
-        '    connectionString &= String.Format("Data Source = {0};", devDataSource)
-        '    connectionString &= String.Format("Initial Catalog = {0};", devInitialCatalog)
-        '    connectionString &= String.Format("User ID = {0};", devUserID)
-        '    connectionString &= String.Format("Password = {0};", devPassword)
-        '    connectionString &= String.Format("Connect Timeout = {0};", devTimeout)
+            '接続先情報を構築
+            connectionString &= String.Format("Data Source = {0};", devDataSource)
+            connectionString &= String.Format("Initial Catalog = {0};", devInitialCatalog)
+            connectionString &= String.Format("User ID = {0};", devUserID)
+            connectionString &= String.Format("Password = {0};", devPassword)
+            connectionString &= String.Format("Connect Timeout = {0};", devTimeout)
 
-        '    Dim connection As SqlConnection = New SqlConnection(connectionString)
+            Dim connection As SqlConnection = New SqlConnection(connectionString)
 
-        '    ' データベースに接続
-        '    connection.Open()
+            ' データベースに接続
+            connection.Open()
 
-        '    ' SQLクエリの作成
-        '    Dim query As String = "DELETE FROM dt_test WHERE text = @Text)"
-        '    Dim command As SqlCommand = New SqlCommand(query, connection)
-        '    command.Parameters.AddWithValue("@Text", text)
+            ' SQLクエリの作成
+            Dim query As String = "DELETE FROM dt_text WHERE text = @Text"
+            Dim command As SqlCommand = New SqlCommand(query, connection)
+            command.Parameters.AddWithValue("@Text", text)
 
-        '    ' クエリを実行
-        '    command.ExecuteNonQuery()
+            ' クエリを実行
+            command.ExecuteNonQuery()
 
-        '    ' データベース接続を閉じる
-        '    connection.Close()
+            ' データベース接続を閉じる
+            connection.Close()
 
-        '    ' ...
-        '    ' 削除が成功した場合はNoContentステータスコード(204)を返す
-        '    ' 削除が失敗した場合はInternalServerErrorステータスコード(500)を返す
-        '    ' ...
+            Dim response As New HttpResponseMessage(HttpStatusCode.NoContent)
+            Return Json(response.StatusCode)
 
-        '    '' 例として、NoContentステータスコードを返す
-        '    'Dim response As New HttpResponseMessage(HttpStatusCode.NoContent)
-        '    'Return response
-        'End Sub
+        End Function
+        'curl -X DELETE https://localhost:44325/api/helloworld/deletetext/text
 
     End Class
 End Namespace
